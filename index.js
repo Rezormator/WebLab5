@@ -27,10 +27,7 @@ function handleCookiesOnPageLoad() {
     if (cookies) {
         const minCount = cookies.split('=')[1];
         const userConfirm = confirm(`You previously had ${minCount} minimum values. Would you like to keep this data?`);
-
-        if (userConfirm) {
-            alert('Cookies exist. Please reload the page to see the form again.');
-        } else {
+        if (!userConfirm) {
             document.cookie = 'minCount=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             location.reload();
         }
@@ -40,7 +37,6 @@ function handleCookiesOnPageLoad() {
 function toggleItalic() {
     const content = document.querySelector('.content');
     const checkbox = document.getElementById('italic-checkbox');
-
     if (checkbox.checked) {
         content.style.fontStyle = 'italic';
         localStorage.setItem('italic', 'true');
@@ -53,7 +49,6 @@ function toggleItalic() {
 function applySavedItalicStyle() {
     const content = document.querySelector('.content');
     const savedItalic = localStorage.getItem('italic');
-
     if (savedItalic === 'true') {
         content.style.fontStyle = 'italic';
         document.getElementById('italic-checkbox').checked = true;
@@ -73,10 +68,68 @@ window.addEventListener('load', function() {
     calculateRectangleArea();
     handleCookiesOnPageLoad();
     applySavedItalicStyle();
+    loadStoredStyles();
 });
 
 document.addEventListener('keypress', handleKeyPress);
 document.getElementById('italic-checkbox').addEventListener('change', toggleItalic);
+document.getElementById('save-style-btn').addEventListener('click', saveCSSInstruction);
+
+// Додавання CSS-інструкцій динамічно
+document.querySelector('.label-2-text').addEventListener('dblclick', () => {
+    const cssInput = document.createElement('input');
+    cssInput.type = 'text';
+    cssInput.placeholder = 'Наприклад: color: red;';
+    cssInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            applyCSSInstruction(cssInput.value);
+            cssInput.remove();
+        }
+    });
+    document.querySelector('.content').appendChild(cssInput);
+    cssInput.focus();
+});
+
+function applyCSSInstruction(instruction) {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `.content { ${instruction} }`;
+    document.head.appendChild(styleElement);
+    saveCSSInstruction(instruction);
+    createDeleteButton(instruction, styleElement);
+}
+
+function saveCSSInstruction(instruction) {
+    const styles = JSON.parse(localStorage.getItem('styles') || '[]');
+    styles.push(instruction);
+    localStorage.setItem('styles', JSON.stringify(styles));
+}
+
+function createDeleteButton(instruction, styleElement) {
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = `Видалити: ${instruction}`;
+    deleteButton.addEventListener('click', () => {
+        styleElement.remove();
+        deleteCSSInstruction(instruction);
+        deleteButton.remove();
+    });
+    document.getElementById('style-controls').appendChild(deleteButton);
+}
+
+function deleteCSSInstruction(instruction) {
+    const styles = JSON.parse(localStorage.getItem('styles') || '[]');
+    const updatedStyles = styles.filter(style => style !== instruction);
+    localStorage.setItem('styles', JSON.stringify(updatedStyles));
+}
+
+function loadStoredStyles() {
+    const styles = JSON.parse(localStorage.getItem('styles') || '[]');
+    styles.forEach(instruction => {
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `.content { ${instruction} }`;
+        document.head.appendChild(styleElement);
+        createDeleteButton(instruction, styleElement);
+    });
+}
 
 function findMinValues() {
     findMinAndSave();
