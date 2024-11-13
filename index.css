@@ -170,6 +170,40 @@ nav a {
     display: inline-block;
 }
 
+#numbers-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+#numbers-form * {
+    font-family: "Tahoma", serif;
+    font-size: 15px;
+}
+
+#numbers-form input {
+    width: 100%;
+    padding: 8px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+#numbers-form button {
+    padding: 10px;
+    background-color: #333333;
+    color: #f7f7f7;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#numbers-form button:hover {
+    background-color: #e1e1e1;
+    color: #333333;
+}
+
 @media (max-width: 1200px) {
     body {
         grid-template-areas:
